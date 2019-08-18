@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html ng-app="spaApp">
+<head>
+    <link href="style.css" rel="stylesheet">
+    <script src="angular.min.js"></script>
+	<script src="angular-route.min.js"></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<br>
+	<ul class="nav nav-tabs" style="width:100%">
+	  <li id="liProject" class="active"><a href="#/project">Add Project</a></li>
+	  <li id="liAddTask"><a href="#/addtask">Add Task</a></li>
+	  <li id="liUser"><a href="#/user">Add User</a></li>
+	  <li id="liViewTask"><a href="#/viewtask">View Task</a></li>
+	</ul>
+	<div ng-view align="center"></div>
+
+<script>
+angular.module("spaApp", ["ngRoute"])
+.config(function($routeProvider){
+	$routeProvider
+	.when("/project", {
+		templateUrl: "pages/project.html",
+		controller: "projectController"
+	})
+	.when("/addtask", {
+		templateUrl: "pages/addtask.html",
+		controller: "addTaskController"
+	})
+	.when("/user", {
+		templateUrl: "pages/user.html",
+		controller: "userController"
+	})
+	.when("/viewtask", {
+		templateUrl: "pages/viewtask.html",
+		controller: "viewTaskController"
+	})
+}).controller("projectController", function($scope) {
+	
+  console.log("project");
+  var projectElem = angular.element( document.querySelector( '#liProject' ) );
+  var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
+  var userElem = angular.element( document.querySelector( '#liUser' ) );
+  var viewTaskElem = angular.element( document.querySelector( '#liViewTask' ) );
+  projectElem.addClass('active');
+  addTaskElem.removeClass('active');
+  userElem.removeClass('active');
+  viewTaskElem.removeClass('active');
+  
+}).controller("addTaskController", function($scope) {
+	
+  console.log("task");
+  var projectElem = angular.element( document.querySelector( '#liProject' ) );
+  var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
+  var userElem = angular.element( document.querySelector( '#liUser' ) );
+  var viewTaskElem = angular.element( document.querySelector( '#liViewTask' ) );
+  addTaskElem.addClass('active');
+  projectElem.removeClass('active');
+  userElem.removeClass('active');
+  viewTaskElem.removeClass('active');
+  
+  
+}).controller("userController", function($scope) {
+	
+  console.log("user");
+  var projectElem = angular.element( document.querySelector( '#liProject' ) );
+  var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
+  var userElem = angular.element( document.querySelector( '#liUser' ) );
+  var viewTaskElem = angular.element( document.querySelector( '#liViewTask' ) );
+  userElem.addClass('active');
+  addTaskElem.removeClass('active');
+  projectElem.removeClass('active');
+  viewTaskElem.removeClass('active');
+  
+}).controller("viewTaskController", function($scope) {
+	
+  console.log("task");
+  var projectElem = angular.element( document.querySelector( '#liProject' ) );
+  var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
+  var userElem = angular.element( document.querySelector( '#liUser' ) );
+  var viewTaskElem = angular.element( document.querySelector( '#liViewTask' ) );
+  viewTaskElem.addClass('active');
+  addTaskElem.removeClass('active');
+  userElem.removeClass('active');
+  projectElem.removeClass('active');
+	  
+});
+</script>
+
+ 
+</body>
+</html>
