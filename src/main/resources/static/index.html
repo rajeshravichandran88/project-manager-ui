@@ -9,8 +9,10 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+	<title>Project Manager</title>
 </head>
 <body>
+	<h1 align="center">Project Manager</h1>
 	<br>
 	<ul class="nav nav-tabs" style="width:100%">
 	  <li id="liProject" class="active"><a href="#/project">Add Project</a></li>
@@ -40,7 +42,7 @@ angular.module("spaApp", ["ngRoute"])
 		templateUrl: "pages/viewtask.html",
 		controller: "viewTaskController"
 	})
-}).controller("projectController", function($scope) {
+}).controller("projectController", function($scope, $http) {
 	
   console.log("project");
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
@@ -51,6 +53,154 @@ angular.module("spaApp", ["ngRoute"])
   addTaskElem.removeClass('active');
   userElem.removeClass('active');
   viewTaskElem.removeClass('active');
+  $scope.projects = {};
+  $scope.users = {};
+  $scope.dateFlag = false;
+  
+  $scope.loadProjects = function () {
+	  $http.get("http://localhost:9000/projectmanager/project/")
+	  .then(function(response) {
+		  for(i=0; i<response.data.length; i++) {
+			  var project = response.data[i];
+			  var completedCount = 0;
+			  for(j=0; j<project.tasks.length; j++) {
+				  if(project.tasks[j].status.includes("completed")) {
+					  completedCount++;
+				  }
+			  }
+			  project.completed = completedCount;
+		  }
+	      $scope.projects = response.data;
+	  });
+	  
+	  $scope.reset();
+  }
+  
+  $scope.searchManager = function () {
+	  $http.get("http://localhost:9000/projectmanager/user/")
+	  .then(function(response) {
+	    $scope.users = response.data;
+	  });
+	  
+  }
+  
+  $scope.setSelected = function (user) {
+	  $scope.selectedUser = user;
+  }
+  
+  $scope.selectUser = function () {
+	  $scope.manager = $scope.selectedUser.firstName + " " + $scope.selectedUser.lastName;
+  }
+  
+  $scope.toggleDateFlag = function () {
+	  if($scope.dateFlag == true) {
+		  $scope.dateFlag = false;
+	  } else {
+		  $scope.dateFlag = true;
+	  }	  
+  }
+  
+  $scope.reset = function () {
+	  $scope.selectedUser = undefined;
+	  $scope.manager = undefined;
+	  $scope.projectName = undefined;
+	  $scope.startDate = undefined;
+	  $scope.endDate = undefined;
+	  $scope.priority = 0;
+	  $scope.dateFlag = false;
+	  $scope.selectedUser = undefined;
+	  angular.element(document.querySelector('#rangeSlider')).value = 0;
+  }
+  
+  $scope.sortByCompleted = function () {
+	  $scope.projects.sort(function(a, b){
+		  return b.completed - a.completed;
+		});
+  }
+  
+  $scope.sortByStartDate = function () {
+	  $scope.projects.sort(function(a, b){
+		  return new Date(a.formattedStartDate).getTime() - new Date(b.formattedStartDate).getTime();
+		});
+  }
+  
+  $scope.sortByEndDate = function () {
+	  $scope.projects.sort(function(a, b){
+		  return new Date(a.formattedEndDate).getTime() - new Date(b.formattedEndDate).getTime();
+		});
+  }
+  
+  $scope.sortByPriority = function () {
+	  $scope.projects.sort(function(a, b){
+		  return a.priority - b.priority;
+		});
+  }
+  
+  $scope.filterProjects = function () {
+	  console.log($scope.searchTxt);
+	  if($scope.searchTxt == '') {
+		  $scope.loadProjects();
+	  } else {
+		  $scope.projects = $scope.projects.filter(function (el) {
+			  return el.project.includes($scope.searchTxt);
+			});
+	  }
+  }
+  
+  $scope.addNewProject = function () {
+	  var valid = true;
+	  if($scope.projectName == undefined || $scope.projectName == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.startDate == undefined || $scope.startDate == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.endDate == undefined || $scope.endDate == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.priority == undefined || $scope.priority == '') {
+		  valid = false;
+	  }
+	  
+	  if(valid) {
+		  var projectJson = {};
+		  projectJson.project = $scope.projectName;
+		  projectJson.startDate = $scope.startDate;
+		  projectJson.endDate = $scope.endDate;
+		  projectJson.priority = $scope.priority;
+		  
+		  $http.post("http://localhost:9000/projectmanager/project/add", projectJson)
+		  .then(function(response) {
+			  console.log(response);
+		    if(response.data) {
+		    	if(response.data.status) {
+		    		alert("Project Successfully Saved");
+		    		$scope.reset();
+		    		$scope.loadProjects();
+		    	} else {
+		    		alert("Project Not Saved");
+		    	}
+		    }
+		  });
+	  } else {
+		  alert("All fields are Mandatory");
+	  }
+  }
+  
+  $scope.editProject = function (projectData) {
+	  $scope.projectName = projectData.project;
+	  $scope.startDate = projectData.formattedStartDate;
+	  $scope.endDate = projectData.formattedEndDate;
+	  $scope.priority = projectData.priority;
+	  $scope.selectedUser = projectData.user;
+	  $scope.manager = $scope.selectedUser.firstName + " " + $scope.selectedUser.lastName;
+	  angular.element(document.querySelector('#rangeSlider')).value = $scope.priority;
+	  angular.element(document.querySelector('#sliderValue')).value = $scope.priority;
+	  $scope.dateFlag = true;
+  }
   
 }).controller("addTaskController", function($scope) {
 	

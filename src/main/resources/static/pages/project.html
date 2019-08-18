@@ -1,10 +1,148 @@
 <div id="project">
-
+	<br>
 	<form id="addProjectForm">
 		<div class="row">
-			<label>Project</label>
-			<input type="text" ng-model="projectName"/>
+			<div class="col-md-2">
+				<label>Project</label>
+			</div>
+			<div class="col-md-6">
+				<input type="text" ng-model="projectName" size="80"/>
+			</div>
 		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label></label>
+			</div>
+			<div class="col-md-6">
+				<input type="checkbox" ng-model="dateFlag" ng-click="toggleDateFlag()"/>
+				<label>Select Start and End Date</label>
+				<input type="text" ng-model="startDate" placeholder="Start Date" ng-disabled="!dateFlag"/>
+				<input type="text" ng-model="endDate" placeholder="End Date" ng-disabled="!dateFlag"/>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label>Priority</label>
+			</div>
+			<div class="col-md-6">
+				<input type="range" id="rangeSlider" min="1" max="30" value="0" class="slider" ng-model="priority" onchange="document.querySelector('#sliderValue').value = this.value;"/>
+			</div>
+			<div class="col-sm-1">
+				<input type="text" id="sliderValue" size="2" value="0" readonly/>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label>Manager</label>
+			</div>
+			<div class="col-md-4">
+				<input type="text" ng-model="manager" size="60" readonly/>
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" ng-click="searchManager()">Search</button>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label></label>
+			</div>
+			<div class="col-md-4">
+				
+			</div>
+			<div class="col-md-2">
+				<input type="button" class="btn btn-primary" value="Add" ng-click="addNewProject()"/>
+				<input type="button" class="btn btn-primary" value="Reset" ng-click="reset()"/>
+			</div>
+		</div>
+		
 	</form>
+	<hr>
+	<div align="center" ng-init="loadProjects()">
+		<div class="row">
+			<input type="text" ng-model="searchTxt" ng-change="filterProjects()" size="80">
+		</div>
+		<br>
+		<div class="row">
+			<label>Sort By:</label>
+			<input type="button" class="btn" style="background:gray;" value="Start Date" ng-click="sortByStartDate()">
+			<input type="button" class="btn" style="background:gray;" value="End Date" ng-click="sortByEndDate()">
+			<input type="button" class="btn" style="background:gray;" value="priority" ng-click="sortByPriority()">
+			<input type="button" class="btn" style="background:gray;" value="Completed" ng-click="sortByCompleted()">
+		</div>
+		<div class="row" style="width:60%;" ng-repeat="projectData in projects">
+			<div >
+				<div class="col-md-8" style="background: gray; margin: 1%;">
+					<div class="row" align="left">
+						<label class="col-md-4">Project: </label>
+						<label class="col-md-8" style="color: white;">{{projectData.project}}</label>
+					</div>
+					<div class="row" align="left">
+						<label class="col-md-4">No. of Tasks: </label>
+						<label class="col-md-2" style="color: white;">{{projectData.tasks.length}}</label>
+						<label class="col-md-3">Completed: </label>
+						<label class="col-md-3" style="color: white;">{{projectData.completed}}</label>
+					</div>
+					<div class="row" align="left">
+						<label class="col-md-3">Start Date: </label>
+						<label class="col-md-3" style="color: white;">{{projectData.formattedStartDate}}</label>
+						<label class="col-md-3">End Date: </label>
+						<label class="col-md-3" style="color: white;">{{projectData.formattedEndDate}}</label>
+					</div>
+				</div>
+				<div class="col-md-1" style="margin:1%;">
+					<div class="row">
+						<label>Priority</label>
+					</div>
+					<div class="row" style="background: gray; margin: 1%;">
+						<label style="color: white;">{{projectData.priority}}</label>
+					</div>
+				</div>
+				<div class="col-md-1" style="margin:1%;">
+					<div class="row">
+						<input type="button" class="btn-default" value="Edit" ng-click="editProject(projectData)" />
+					</div>
+					<br>
+					<div class="row">
+						<input type="button" class="btn-default" value="Suspend" />
+					</div>
+				</div>
+			</div>
+		
+		</div>
+	</div>
     
+</div>
+
+<div class="container" >
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Select Manager</h4>
+        </div>
+        <div class="modal-body" style="height:200px; overflow-y: scroll;">
+          <div class="row" ng-repeat="user in users" align="left" style="margin:2%;">
+          	<!-- <input type="radio" name="userRadio" id={{user.userId}} value="1" ng-change='setSelected(1)'>-->
+          	<input type="radio" ng-model="slctUser" name="userRadio" value="user" ng-change='setSelected(user)'>
+          	<label>{{user.firstName}}</label><label>{{user.firstName}}</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+      	  <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="selectUser()">Select</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
 </div>
