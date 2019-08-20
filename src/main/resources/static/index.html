@@ -341,7 +341,7 @@ angular.module("spaApp", ["ngRoute"])
 	  }
   }
   
-}).controller("userController", function($scope) {
+}).controller("userController", function($scope, $http) {
 	
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
   var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
@@ -351,6 +351,125 @@ angular.module("spaApp", ["ngRoute"])
   addTaskElem.removeClass('active');
   projectElem.removeClass('active');
   viewTaskElem.removeClass('active');
+  
+  $scope.loadUsers = function () {
+	  $http.get("http://localhost:9000/projectmanager/user/")
+	  .then(function(response) {
+		  $scope.users = response.data;
+	  });
+  }
+  
+  $scope.reset = function () {
+	  $scope.firstName = undefined;
+	  $scope.lastName = undefined;
+	  $scope.employeeId = undefined;
+	  $scope.userId = undefined;
+  }
+  
+  $scope.isValid = function () {
+	  var valid = true;
+	  if($scope.firstName == undefined || $scope.firstName == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.lastName == undefined || $scope.lastName == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.employeeId == undefined || $scope.employeeId == '') {
+		  valid = false;
+	  }
+	  return valid;
+  }
+  
+  $scope.addNewUser = function () {
+	  if($scope.isValid()) {
+		  var userJson = {};
+		  userJson.firstName = $scope.firstName;
+		  userJson.lastName = $scope.lastName;
+		  userJson.employeeId = $scope.employeeId;
+		  console.log(userJson);
+		  if($scope.userId != undefined && $scope.userId != '') {
+			  $scope.userId = user.userId;
+		  }
+		  
+		  $http.post("http://localhost:9000/projectmanager/user/add", userJson)
+		  .then(function(response) {
+			  console.log(response);
+		    if(response.data) {
+		    	if(response.data.status) {
+		    		alert("User Successfully Saved");
+		    		$scope.loadUsers();
+		    		$scope.reset();
+		    	} else {
+		    		alert("User Not Saved");
+		    	}
+		    }
+		  });
+	  } else {
+		  alert("All fields are Mandatory");
+	  }
+  }
+  
+  $scope.editUser = function (user) {
+	  console.log(user);
+	  $scope.firstName = user.firstName;
+	  $scope.lastName = user.lastName;
+	  $scope.employeeId = user.employeeId;
+	  $scope.userId = user.userId;
+  }
+  
+  $scope.deleteUser = function (user) {
+	  $http.post("http://localhost:9000/projectmanager/user/delete/"+user.userId)
+	  .then(function(response) {
+		  console.log(response);
+	    if(response.data) {
+	    	if(response.data.status) {
+	    		alert("User Successfully Deleted");
+	    		$scope.loadUsers();
+	    		$scope.reset();
+	    	} else {
+	    		alert("User Not Deleted");
+	    	}
+	    }
+	  });
+  }
+  
+  $scope.filterUsers = function () {
+	  if($scope.searchTxt == '') {
+		  $scope.loadUsers();
+	  } else {
+		  $scope.users = $scope.users.filter(function (el) {
+			  return el.firstName.includes($scope.searchTxt);
+			});
+	  }
+  }
+  
+  function compareStrings(a, b) {
+	  // Assuming you want case-insensitive comparison
+	  a = a.toLowerCase();
+	  b = b.toLowerCase();
+
+	  return (a < b) ? -1 : (a > b) ? 1 : 0;
+  }
+  
+  $scope.sortById = function () {
+	  $scope.users.sort(function(a, b){
+		  return a.employeeId - b.employeeId;
+		});
+  }
+  
+  $scope.sortByFirstName = function () {
+	  $scope.users.sort(function(a, b){
+		  return compareStrings(a.firstName, b.firstName);
+		});
+  }
+  
+  $scope.sortByLastName = function () {
+	  $scope.users.sort(function(a, b){
+		  return compareStrings(a.lastName, b.lastName);
+		});
+  }
   
 }).controller("viewTaskController", function($scope) {
 	

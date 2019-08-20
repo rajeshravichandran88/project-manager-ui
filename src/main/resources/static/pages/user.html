@@ -1,5 +1,78 @@
-
-<div id="page3">
-    <h1>Page 3</h1>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<div id="user">
+	<br>
+	<div class="row">
+		<form id="addUserForm">
+			<div class="row">
+				<div class="col-md-2">
+					<label>First Name</label>
+				</div>
+				<div class="col-md-6" align="left">
+					<input type="text" ng-model="firstName" size="80"/>
+				</div>
+			</div>
+			<br>
+			<div class="row">
+				<div class="col-md-2">
+					<label>Last Name</label>
+				</div>
+				<div class="col-md-6" align="left">
+					<input type="text" ng-model="lastName" size="80"/>
+				</div>
+			</div>
+			<br>
+			<div class="row">
+				<div class="col-md-2">
+					<label>Employee ID</label>
+				</div>
+				<div class="col-md-2" align="left">
+					<input type="text" ng-model="employeeId" size="20"/>
+				</div>
+				<div class="col-md-4">
+					<label></label>
+				</div>
+			</div>
+			<br>
+			<div class="row">
+				<div class="col-md-2">
+					<label></label>
+				</div>
+				<div class="col-md-4">
+					
+				</div>
+				<div class="col-md-2">
+					<input type="button" class="btn btn-primary" value="Save" ng-click="addNewUser()"/>
+					<input type="button" class="btn btn-primary" value="Reset" ng-click="reset()"/>
+				</div>
+			</div>
+			
+		</form>
+	</div>
+	<hr>
+	<div align="center" ng-init="loadUsers()">
+		<div class="row" style="width:50%;" align="center">
+				<input type="text" ng-model="searchTxt" ng-change="filterUsers()" size="20">
+				<label>Sort By:</label>
+				<input type="button" class="btn" style="background:gray;" value="First Name" ng-click="sortByFirstName()">
+				<input type="button" class="btn" style="background:gray;" value="Last Name" ng-click="sortByLastName()">
+				<input type="button" class="btn" style="background:gray;" value="ID" ng-click="sortById()">
+		</div>
+		<br>
+		<div class="row" style="width:30%;" ng-repeat="user in users" align="center">
+			<div>
+				<div class="row" style="padding: 2px;" align="left">
+					<label class="btn" style="width: 320px;background: gray;text-align: left;">{{user.firstName}} </label>
+					<input type="button" class="btn btn-primary" value="Edit" ng-click="editUser(user)">
+				</div>
+				<div class="row" style="padding: 2px;" align="left">
+					<label class="btn" style="width: 320px;background: gray;text-align: left;">{{user.lastName}} </label>
+					<input type="button" class="btn btn-primary" value="Delete" ng-click="deleteUser(user)">
+				</div>
+				<div class="row" style="padding: 2px;" align="left">
+					<label class="btn" style="width: 320px;background: gray;text-align: left;">{{user.employeeId}} </label>
+				</div>
+			</div>
+			<hr>
+		</div>
+	</div>
+    
 </div>
