@@ -1,6 +1,176 @@
+<div id="addTask" ng-init="init()">
+	<br>
+	<form id="addTaskForm">
+		<div class="row">
+			<div class="col-md-2">
+				<label>Project</label>
+			</div>
+			<div class="col-md-4">
+				<input type="text" ng-model="project" size="60" readonly/>
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#projectModal" ng-click="searchProject()">Search</button>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label>Task</label>
+			</div>
+			<div class="col-md-6" align="left">
+				<input type="text" ng-model="task" size="80"/>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label></label>
+			</div>
+			<div class="col-md-6" align="left">
+				<input type="checkbox" ng-model="parentTaskFlag" />
+				<label>Parent Task</label>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label>Priority</label>
+			</div>
+			<div class="col-md-6">
+				<input type="range" id="rangeSlider" min="1" max="30" value="0" class="slider" ng-model="priority" onchange="document.querySelector('#sliderValue').value = this.value;"/>
+			</div>
+			<div class="col-sm-1">
+				<input type="text" id="sliderValue" size="2" value="0" readonly/>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label>Parent Task</label>
+			</div>
+			<div class="col-md-4">
+				<input type="text" ng-model="parentTask" size="60" readonly />
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#parentTaskModal" ng-click="searchParentTask()" ng-disabled="!parentTaskFlag">Search</button>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label>Start Date</label>
+			</div>
+			<div class="col-md-6" align="left">
+				<input type="text" ng-model="startDate" placeholder="Start Date"/>
+				<label>End Date</label>
+				<input type="text" ng-model="endDate" placeholder="End Date"/>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label>User</label>
+			</div>
+			<div class="col-md-4">
+				<input type="text" ng-model="user" size="60" readonly/>
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#userModal" ng-click="searchUser()">Search</button>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-2">
+				<label></label>
+			</div>
+			<div class="col-md-4">
+				
+			</div>
+			<div class="col-md-2">
+				<input type="button" class="btn btn-primary" value="Add" ng-click="addNewTask()"/>
+				<input type="button" class="btn btn-primary" value="Reset" ng-click="reset()"/>
+			</div>
+		</div>
+		
+	</form>
+    
+</div>
 
- 
-<div id="page2">
-    <h1>Page 2</h1>
-    <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>
+<div class="container" >
+
+<!-- Modal -->
+  <div class="modal fade" id="projectModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Select Project</h4>
+        </div>
+        <div class="modal-body" style="height:200px; overflow-y: scroll;">
+          <div class="row" ng-repeat="project in projects" align="left" style="margin:2%;">
+          	<input type="radio" ng-model="slctProject" name="projectRadio" value="project" ng-change='setSelectedProject(project)'>
+          	<label>{{project.project}}</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+      	  <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="selectProject()">Select</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="parentTaskModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Select Parent Task</h4>
+        </div>
+        <div class="modal-body" style="height:200px; overflow-y: scroll;">
+          <div class="row" ng-repeat="parentTask in parentTasks" align="left" style="margin:2%;">
+          	<input type="radio" ng-model="slctParentTask" name="parentTaskRadio" value="parentTask" ng-change='setSelectedParentTask(parentTask)'>
+          	<label>{{parentTask.parentTask}}</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+      	  <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="selectParentTask()">Select</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="userModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Select User</h4>
+        </div>
+        <div class="modal-body" style="height:200px; overflow-y: scroll;">
+          <div class="row" ng-repeat="user in users" align="left" style="margin:2%;">
+          	<input type="radio" ng-model="slctUser" name="userRadio" value="user" ng-change='setSelectedUser(user)'>
+          	<label>{{user.firstName}}</label> <label>{{user.firstName}}</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+      	  <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="selectUser()">Select</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
 </div>

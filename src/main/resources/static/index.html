@@ -15,7 +15,7 @@
 	<h1 align="center">Project Manager</h1>
 	<br>
 	<ul class="nav nav-tabs" style="width:100%">
-	  <li id="liProject" class="active"><a href="#/project">Add Project</a></li>
+	  <li id="liProject"><a href="#/project">Add Project</a></li>
 	  <li id="liAddTask"><a href="#/addtask">Add Task</a></li>
 	  <li id="liUser"><a href="#/user">Add User</a></li>
 	  <li id="liViewTask"><a href="#/viewtask">View Task</a></li>
@@ -60,13 +60,19 @@ angular.module("spaApp", ["ngRoute"])
   $scope.loadProjects = function () {
 	  $http.get("http://localhost:9000/projectmanager/project/")
 	  .then(function(response) {
+		  console.log(response.data);
 		  for(i=0; i<response.data.length; i++) {
 			  var project = response.data[i];
 			  var completedCount = 0;
-			  for(j=0; j<project.tasks.length; j++) {
-				  if(project.tasks[j].status.includes("completed")) {
-					  completedCount++;
+			  if(project.tasks) {
+				  for(j=0; j<project.tasks.length; j++) {
+					  if(project.tasks[j].status.includes("completed")) {
+						  completedCount++;
+					  }
 				  }
+			  } else {
+				  console.log('tasksss');
+				  project.tasks = [];
 			  }
 			  project.completed = completedCount;
 		  }
@@ -195,16 +201,17 @@ angular.module("spaApp", ["ngRoute"])
 	  $scope.startDate = projectData.formattedStartDate;
 	  $scope.endDate = projectData.formattedEndDate;
 	  $scope.priority = projectData.priority;
-	  $scope.selectedUser = projectData.user;
-	  $scope.manager = $scope.selectedUser.firstName + " " + $scope.selectedUser.lastName;
+	  if(projectData.user) {
+		  $scope.selectedUser = projectData.user;
+		  $scope.manager = $scope.selectedUser.firstName + " " + $scope.selectedUser.lastName;
+	  }
 	  angular.element(document.querySelector('#rangeSlider')).value = $scope.priority;
 	  angular.element(document.querySelector('#sliderValue')).value = $scope.priority;
 	  $scope.dateFlag = true;
   }
   
-}).controller("addTaskController", function($scope) {
+}).controller("addTaskController", function($scope, $http) {
 	
-  console.log("task");
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
   var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
   var userElem = angular.element( document.querySelector( '#liUser' ) );
@@ -214,10 +221,128 @@ angular.module("spaApp", ["ngRoute"])
   userElem.removeClass('active');
   viewTaskElem.removeClass('active');
   
+  $scope.init = function () {
+	  $scope.priority = 0;
+	  angular.element(document.querySelector('#rangeSlider')).value = $scope.priority;
+	  angular.element(document.querySelector('#sliderValue')).value = $scope.priority;
+  }
+  
+  $scope.reset = function () {
+	  $scope.priority = 0;
+	  angular.element(document.querySelector('#rangeSlider')).value = $scope.priority;
+	  angular.element(document.querySelector('#sliderValue')).value = $scope.priority;
+	  $scope.selectedProject = undefined;
+	  $scope.project = undefined;
+	  $scope.selectedParentTask = undefined;
+	  $scope.parentTask = undefined;
+	  $scope.selectedUser = undefined;
+	  $scope.user = undefined;
+	  $scope.task = undefined;
+	  $scope.startDate = undefined;
+	  $scope.endDate = undefined;
+	  $scope.priority = undefined;
+  }
+  
+  $scope.searchProject = function () {
+	  $http.get("http://localhost:9000/projectmanager/project/")
+	  .then(function(response) {
+	    $scope.projects = response.data;
+	  });
+  }
+  
+  $scope.setSelectedProject = function (project) {
+	  $scope.selectedProject = project;
+	  $scope.project = project.project;
+  }
+  
+  $scope.searchParentTask = function () {
+	  $http.get("http://localhost:9000/projectmanager/parenttask/")
+	  .then(function(response) {
+	    $scope.parentTasks = response.data;
+	  });
+  }
+  
+  $scope.setSelectedParentTask = function (parentTask) {
+	  $scope.selectedParentTask = parentTask;
+	  $scope.parentTask = parentTask.parentTask;
+  }
+  
+  $scope.searchUser = function () {
+	  $http.get("http://localhost:9000/projectmanager/user/")
+	  .then(function(response) {
+	    $scope.users = response.data;
+	  });
+  }
+  
+  $scope.setSelectedUser = function (user) {
+	  $scope.selectedUser = user;
+	  $scope.user = user.firstName + " " + user.lastName;
+  }
+  
+  $scope.addNewTask = function () {
+	  var valid = true;
+	  if($scope.selectedProject == undefined || $scope.selectedProject == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.task == undefined || $scope.task == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.parentTaskFlag) {
+		  if($scope.selectedParentTask == undefined || $scope.selectedParentTask == '') {
+			  valid = false;
+		  }
+	  }
+	  
+	  if($scope.priority == undefined || $scope.priority == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.startDate == undefined || $scope.startDate == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.endDate == undefined || $scope.endDate == '') {
+		  valid = false;
+	  }
+	  
+	  if($scope.selectedUser == undefined || $scope.selectedUser == '') {
+		  valid = false;
+	  }
+	  
+	  if(valid) {
+		  var taskJson = {};
+		  taskJson.projectId = $scope.selectedProject.projectId;
+		  if($scope.parentTaskFlag) {
+			  taskJson.parentId = $scope.selectedParentTask.parentId;
+		  }
+		  taskJson.task = $scope.task;
+		  taskJson.startDate = $scope.startDate;
+		  taskJson.endDate = $scope.endDate;
+		  taskJson.priority = $scope.priority;
+		  taskJson.status = "Open";
+		  
+		  $http.post("http://localhost:9000/projectmanager/task/add", taskJson)
+		  .then(function(response) {
+			  console.log(response);
+		    if(response.data) {
+		    	if(response.data.status) {
+		    		alert("Task Successfully Saved");
+		    		$scope.reset();
+		    		$scope.init();
+		    	} else {
+		    		alert("Task Not Saved");
+		    	}
+		    }
+		  });
+	  } else {
+		  alert("All fields are Mandatory");
+	  }
+  }
   
 }).controller("userController", function($scope) {
 	
-  console.log("user");
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
   var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
   var userElem = angular.element( document.querySelector( '#liUser' ) );
@@ -229,7 +354,6 @@ angular.module("spaApp", ["ngRoute"])
   
 }).controller("viewTaskController", function($scope) {
 	
-  console.log("task");
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
   var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
   var userElem = angular.element( document.querySelector( '#liUser' ) );
