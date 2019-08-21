@@ -42,9 +42,15 @@ angular.module("spaApp", ["ngRoute"])
 		templateUrl: "pages/viewtask.html",
 		controller: "viewTaskController"
 	})
+	.when("/edittask/:taskId", {
+		templateUrl: "pages/addtask.html",
+		controller: "addTaskController"
+	})
+	.otherwise({
+	    redirectTo:'/'
+	});
 }).controller("projectController", function($scope, $http) {
 	
-  console.log("project");
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
   var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
   var userElem = angular.element( document.querySelector( '#liUser' ) );
@@ -71,7 +77,6 @@ angular.module("spaApp", ["ngRoute"])
 					  }
 				  }
 			  } else {
-				  console.log('tasksss');
 				  project.tasks = [];
 			  }
 			  project.completed = completedCount;
@@ -210,8 +215,8 @@ angular.module("spaApp", ["ngRoute"])
 	  $scope.dateFlag = true;
   }
   
-}).controller("addTaskController", function($scope, $http) {
-	
+}).controller("addTaskController", function($scope, $http, $routeParams) {
+
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
   var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
   var userElem = angular.element( document.querySelector( '#liUser' ) );
@@ -220,11 +225,42 @@ angular.module("spaApp", ["ngRoute"])
   projectElem.removeClass('active');
   userElem.removeClass('active');
   viewTaskElem.removeClass('active');
+  $scope.editFlag = false;
   
   $scope.init = function () {
 	  $scope.priority = 0;
 	  angular.element(document.querySelector('#rangeSlider')).value = $scope.priority;
 	  angular.element(document.querySelector('#sliderValue')).value = $scope.priority;
+	  
+	  if($routeParams.taskId) {
+		  $http.get("http://localhost:9000/projectmanager/task/"+$routeParams.taskId)
+		  .then(function(response) {
+		      $scope.taskData = response.data;
+		      $scope.editFlag = true;
+		      
+		      $http.get("http://localhost:9000/projectmanager/project/"+$scope.taskData.projectId)
+			  .then(function(response) {
+			      $scope.selectedProject = response.data;
+				  $scope.project = response.data.project;
+			  });
+			  
+		      if($scope.taskData.parentId) {
+		    	  $http.get("http://localhost:9000/projectmanager/parenttask/"+$scope.taskData.parentId)
+				  .then(function(response) {
+				      $scope.selectedParentTask = response.data;
+					  $scope.parentTask = response.data.parentTask;
+				  });
+		      }
+			  
+			  $scope.task = $scope.taskData.task;
+			  $scope.startDate = $scope.taskData.formattedStartDate;
+			  $scope.endDate = $scope.taskData.formattedEndDate;
+			  $scope.priority = $scope.taskData.priority;
+			  angular.element(document.querySelector('#sliderValue')).value = $scope.priority;
+			  angular.element(document.querySelector('#rangeSlider')).value = $scope.priority;
+		  });
+		  
+	  }
   }
   
   $scope.reset = function () {
@@ -321,7 +357,11 @@ angular.module("spaApp", ["ngRoute"])
 		  taskJson.startDate = $scope.startDate;
 		  taskJson.endDate = $scope.endDate;
 		  taskJson.priority = $scope.priority;
-		  taskJson.status = "Open";
+		  
+		  if($scope.editFlag == true) {
+			  taskJson.taskId = $scope.taskData.taskId;
+			  taskJson.status = $scope.taskData.status;
+		  }
 		  
 		  $http.post("http://localhost:9000/projectmanager/task/add", taskJson)
 		  .then(function(response) {
@@ -471,7 +511,7 @@ angular.module("spaApp", ["ngRoute"])
 		});
   }
   
-}).controller("viewTaskController", function($scope) {
+}).controller("viewTaskController", function($scope, $http, $location) {
 	
   var projectElem = angular.element( document.querySelector( '#liProject' ) );
   var addTaskElem = angular.element( document.querySelector( '#liAddTask' ) );
@@ -481,6 +521,84 @@ angular.module("spaApp", ["ngRoute"])
   addTaskElem.removeClass('active');
   userElem.removeClass('active');
   projectElem.removeClass('active');
+  
+  $scope.loadTasks = function () {
+	  $http.get("http://localhost:9000/projectmanager/task/")
+	  .then(function(response) {
+		  $scope.tasks = response.data;
+		  
+		  for(i=0; i<$scope.tasks.length; i++) {
+			  if(!$scope.tasks[i].parentId) {
+				  var parentTask = {};
+				  parentTask.parentTask = "This Task has No Parent";
+				  $scope.tasks[i].parentTask = parentTask;
+			  }
+		  }
+	  });
+  }
+  
+  $scope.filterProjects = function () {
+	  if($scope.searchTxt == '') {
+		  $scope.loadTasks();
+	  } else {
+		  $scope.tasks = $scope.tasks.filter(function (el) {
+			  if(el.parentId) {
+				  return el.parentTask.parentTask.includes($scope.searchTxt);
+			  }
+			});
+	  }
+  }
+  
+  function compareStrings(a, b) {
+	  // Assuming you want case-insensitive comparison
+	  a = a.toLowerCase();
+	  b = b.toLowerCase();
+
+	  return (a < b) ? -1 : (a > b) ? 1 : 0;
+  }
+  
+  $scope.sortByCompleted = function () {
+	  $scope.tasks.sort(function(a, b){
+		  return compareStrings(a.status, b.status);
+		});
+  }
+  
+  $scope.sortByStartDate = function () {
+	  $scope.tasks.sort(function(a, b){
+		  return new Date(a.formattedStartDate).getTime() - new Date(b.formattedStartDate).getTime();
+		});
+  }
+  
+  $scope.sortByEndDate = function () {
+	  $scope.tasks.sort(function(a, b){
+		  return new Date(a.formattedEndDate).getTime() - new Date(b.formattedEndDate).getTime();
+		});
+  }
+  
+  $scope.sortByPriority = function () {
+	  $scope.tasks.sort(function(a, b){
+		  return a.priority - b.priority;
+		});
+  }
+  
+  $scope.endTask = function (task) {
+	  task.status = "Completed";
+	  $http.post("http://localhost:9000/projectmanager/task/add", task)
+	  .then(function(response) {
+	    if(response.data) {
+	    	if(response.data.status) {
+	    		alert("Task Successfully Ended");
+	    		$scope.loadTasks();
+	    	} else {
+	    		alert("Task Not Ended");
+	    	}
+	    }
+	  });
+  }
+  
+  $scope.editTask = function (task) {
+	  $location.path("/edittask/"+task.taskId);
+  }
 	  
 });
 </script>

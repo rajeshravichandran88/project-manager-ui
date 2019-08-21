@@ -1,6 +1,42 @@
-
- 
-<div id="page4">
-    <h1>Page 4</h1>
-    <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>
+<div id="viewTask">
+    <div align="center" ng-init="loadTasks()">
+    	<br>
+		<div class="row">
+			<label>Project: </label>
+			<input type="text" ng-model="searchTxt" size="80">
+			<input type="button" class="btn" style="background:gray;" ng-click="filterProjects()" value="Search">
+		</div>
+		<br>
+		<div class="row">
+			<label>Sort Task By:</label>
+			<input type="button" class="btn" style="background:gray;" value="Start Date" ng-click="sortByStartDate()">
+			<input type="button" class="btn" style="background:gray;" value="End Date" ng-click="sortByEndDate()">
+			<input type="button" class="btn" style="background:gray;" value="priority" ng-click="sortByPriority()">
+			<input type="button" class="btn" style="background:gray;" value="Completed" ng-click="sortByCompleted()">
+		</div>
+		<hr>
+		<div class="row" ng-repeat="task in tasks" align="center">
+			<div style="width: 90%;">
+				<div class="row">
+					<label class="col-md-3" style="width: 320px;">Project </label>
+					<label class="col-md-3" style="width: 280px;">Parent </label>
+					<label class="col-md-1">Priority </label>
+					<label class="col-md-1">Start </label>
+					<label class="col-md-1">End </label>
+					<label class="col-md-1"></label>
+					<label class="col-md-1"></label>
+				</div>
+				<div class="row">
+					<div class="btn col-md-3" style="margin:5px;width: 320px; height: 80px;background: gray;text-align: center;word-wrap: break-word;">{{task.task}} </div>
+					<div class="btn col-md-3" style="margin:5px;width: 280px; height: 80px;background: gray;text-align: center;word-wrap: break-word;">{{task.parentTask.parentTask}} </div>
+					<label class="btn col-md-1" style="margin:5px;background: gray;text-align: center;">{{task.priority}} </label>
+					<label class="btn col-md-1" style="margin:5px;background: gray;text-align: center;">{{task.formattedStartDate}} </label>
+					<label class="btn col-md-1" style="margin:5px;background: gray;text-align: center;">{{task.formattedEndDate}} </label>
+					<input type="button" style="margin:5px;" class="btn btn-primary col-md-1" ng-click="editTask(task)" value="Edit"/>
+					<input type="button" style="margin:5px;" class="btn btn-primary col-md-1" ng-click="endTask(task)" value="End Task"/>
+				</div>
+			</div>
+			<hr>
+		</div>
+	</div>
 </div>
